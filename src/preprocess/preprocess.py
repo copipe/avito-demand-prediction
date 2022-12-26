@@ -7,15 +7,9 @@ from typing import Dict, Union
 import cudf
 import numpy as np
 import pandas as pd
-import yaml
 from sklearn.model_selection import GroupKFold
 from sklearn.preprocessing import LabelEncoder
-
-
-def load_config(config_path: str) -> Dict:
-    with open(config_path, "r") as f:
-        config = yaml.safe_load(f)
-    return config
+from src.utils.io import load_config
 
 
 def load_data(input_dir: Path) -> pd.DataFrame:
@@ -74,7 +68,7 @@ def clean_text(df: pd.DataFrame) -> pd.DataFrame:
 
 
 def clean_number(df: pd.DataFrame) -> pd.DataFrame:
-    df["image_score"] = df["image_top_1"].fillna(-1).astype(int)
+    df["image_class"] = df["image_top_1"].fillna(-1).astype(int)
     df["price"] = np.log1p(df["price"]).fillna(0)
     df["deal_probability"] = df["deal_probability"].fillna(-1)
     df = df.drop("image_top_1", axis=1)
@@ -101,14 +95,14 @@ def concat_text(df: pd.DataFrame) -> pd.DataFrame:
 
 def sort_columns(df: pd.DataFrame) -> pd.DataFrame:
     cols = [
-        "user_id",
         "item_id",
+        "user_id",
         "deal_probability",
         "is_train",
         "kfold",
         "price",
         "item_seq_number",
-        "image_score",
+        "image_class",
         "user_type",
         "region_id",
         "category_id_1",
