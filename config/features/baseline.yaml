@@ -1,0 +1,62 @@
+processed_data_path: 'data/processed/baseline.pickle'
+feature_path: 'data/features/baseline.pickle'
+keep_columns:
+  - 'item_id'
+  - 'deal_probability'
+  - 'is_train'
+  - 'kfold'
+
+raw_features:
+  save_path: 'data/features/raw_features/features.pickle'
+  columns:
+    - 'price'
+    - 'item_seq_number'
+    - 'image_class'
+    - 'user_type'
+    - 'region_id'
+    - 'category_id_1'
+    - 'category_id_2'
+
+concat_group_aggregation:
+  save_path: 'data/features/group_aggregation/concat.pickle'
+  group_aggregation_configs:
+    -
+      save_path: 'data/features/group_aggregation/nunique_iid_by_uid.pickle'
+      group_keys: 'user_id'
+      target: 'item_id'
+      agg: 'count'
+      fillna: 0
+      filter_train: False
+      feature_name: 'nunique_iid_by_uid'
+    -
+      save_path: 'data/features/group_aggregation/avg_price_uid.pickle'
+      group_keys: 'user_id'
+      target: 'price'
+      agg: 'mean'
+      fillna: 0
+      filter_train: False
+      feature_name: 'avg_price_by_uid'
+    -
+      save_path: 'data/features/group_aggregation/min_price_uid.pickle'
+      group_keys: 'user_id'
+      target: 'price'
+      agg: 'min'
+      fillna: 0
+      filter_train: False
+      feature_name: 'min_price_by_uid'
+    -
+      save_path: 'data/features/group_aggregation/max_price_uid.pickle'
+      group_keys: 'user_id'
+      target: 'price'
+      agg: 'max'
+      fillna: 0
+      filter_train: False
+      feature_name: 'max_price_by_uid'
+    -
+      save_path: 'data/features/group_aggregation/avg_target_uid.pickle'
+      group_keys: 'user_id'
+      target: 'deal_probability'
+      agg: 'mean'
+      fillna: -1
+      filter_train: True
+      feature_name: 'avg_target_by_uid'
