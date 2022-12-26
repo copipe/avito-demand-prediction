@@ -1,0 +1,28 @@
+version: "3.8"
+
+services:
+  avito:
+    image: nvidia-rapids
+    container_name: avito
+    build:
+      args:
+        - PROJECT_NAME=avito
+        - USER_NAME=developer
+        - GROUP_NAME=developer
+        - UID=${HOST_UID-1000}
+        - GID=${HOST_GID-1000}
+      context: ./
+      dockerfile: Dockerfile
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - capabilities:
+                - gpu
+    tty: true
+    volumes:
+      - ./:/home/developer/avito
+      - /hdd_disk/avito_data:/home/developer/avito/data
+      - /hdd_disk/avito_model:/home/developer/avito/model
+    ports:
+      - 8888:8888

@@ -1,0 +1,13 @@
+gensim
+lightgbm
+catboost
+timm
+albumentations
+transformers
+pytest
+black
+isort
+flake8
+mypy
+jupyterlab
+jupyterlab-vim
