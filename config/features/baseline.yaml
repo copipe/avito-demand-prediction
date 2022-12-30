@@ -57,13 +57,50 @@ concat_diff_features:
       right_feature: 'avg_price_by_uid'
       feature_name: 'diff_price-avg_price_by_uid'
 
-tfidf_svd:
-  save_path: 'data/features/tfidf_svd'
-  tfidf_params:
-    analyzer: 'word'
-    smooth_idf: True
-  svd_params:
-    n_components: 20
-    random_state: 0
-  text_column: 'title'
-  feature_name: 'tfidf-svd_title'
+concat_text_basic_aggregation:
+  save_dir: 'data/features/text_basic_aggregation'
+  configs:
+    -
+      text_column: 'title'
+      feature_name: 'title'
+    -
+      text_column: 'description'
+      feature_name: 'description'
+
+concat_tfidf_aggregation:
+  save_dir: 'data/features/tfidf_aggregation'
+  configs:
+    -
+      tfidf_params:
+        analyzer: 'word'
+        smooth_idf: True
+      text_column: 'title'
+      feature_name: 'tfidf-agg_title'
+    -
+      tfidf_params:
+        analyzer: 'word'
+        smooth_idf: False
+      text_column: 'title'
+      feature_name: 'count-agg_title'
+
+concat_tfidf_svd:
+  save_dir: 'data/features/tfidf_svd'
+  configs:
+    -
+      tfidf_params:
+        analyzer: 'word'
+        smooth_idf: True
+      svd_params:
+        n_components: 5
+        random_state: 0
+      text_column: 'title'
+      feature_name: 'tfidf-svd_title'
+    -
+      tfidf_params:
+        analyzer: 'word'
+        smooth_idf: False
+      svd_params:
+        n_components: 5
+        random_state: 0
+      text_column: 'title'
+      feature_name: 'count-svd_title'

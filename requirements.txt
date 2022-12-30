@@ -4,6 +4,7 @@ catboost
 timm
 albumentations
 transformers
+nltk
 pytest
 black
 isort
