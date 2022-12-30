@@ -4,7 +4,8 @@ from typing import Dict
 
 import pandas as pd
 from src.features.base import ConcatFeatures, RawFeatures
-from src.features.table import ConcatGroupAggregation
+from src.features.table import ConcatDiffFeatures, ConcatGroupAggregation
+from src.features.text import TFIDFSVD
 from src.utils.io import load_config
 
 warnings.filterwarnings("ignore")
@@ -15,6 +16,8 @@ def get_feature_transformer(config: Dict) -> ConcatFeatures:
     feature_transformers = [
         RawFeatures(**config["raw_features"]),
         ConcatGroupAggregation(**config["concat_group_aggregation"]),
+        ConcatDiffFeatures(**config["concat_diff_features"]),
+        TFIDFSVD(**config["tfidf_svd"]),
     ]
     save_path = config["feature_path"]
     keep_columns = config["keep_columns"]
