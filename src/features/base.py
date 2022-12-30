@@ -1,12 +1,12 @@
 import gc
 from pathlib import Path
-from typing import List
+from typing import List, Union
 
 import pandas as pd
 
 
 class AbstractFeatureTransformer:
-    def __init__(self, save_path: str):
+    def __init__(self, save_path: Union[str, Path]):
         self.name = self.__class__.__name__
         self.save_path = Path(save_path)
 
@@ -45,7 +45,7 @@ class RawFeatures(AbstractFeatureTransformer):
     def __init__(
         self,
         columns: List[str],
-        save_path: str,
+        save_path: Union[str, Path],
     ):
         super().__init__(save_path)
         self.columns = columns
@@ -59,34 +59,48 @@ class ConcatFeatures(AbstractFeatureTransformer):
     def __init__(
         self,
         feature_transformers: List[AbstractFeatureTransformer],
-        save_path: str,
+        save_path: Union[str, Path],
         keep_columns: List[str] = [],
     ):
         super().__init__(save_path)
         self.feature_transformers = feature_transformers
         self.keep_columns = keep_columns
-        self.dummy_columns = ["item_id"]
 
     def _fit(self, df: pd.DataFrame):
         for feature_transformer in self.feature_transformers:
-            print(f"{feature_transformer.name} fiting...")
             feature_transformer.fit(df)
             gc.collect()
 
     def _transform(self, df: pd.DataFrame) -> pd.DataFrame:
-        if self.keep_columns:
-            features = df[self.keep_columns]
-        else:
-            features = df[self.dummy_columns]
-
+        feature_columns = []
         for feature_transformer in self.feature_transformers:
-            print(f"{feature_transformer.name} transforming...")
             feature = feature_transformer.transform(df)
             for col in feature.columns:
-                features[col] = feature[col]
+                df[col] = feature[col]
+                feature_columns.append(col)
             del feature_transformer, feature
             gc.collect()
 
-        if not self.keep_columns:
-            features = features.drop(self.dummy_columns, axis=1)
+        features = df[self.keep_columns + feature_columns]
         return features
+
+
+class ConcatSameClassFeatures(ConcatFeatures):
+    def __init__(
+        self,
+        configs: List,
+        save_dir: Union[str, Path],
+        feature_transformer: AbstractFeatureTransformer,
+    ):
+        self.configs = configs
+        self.save_dir = Path(save_dir)
+        self.feature_transformer = feature_transformer
+        feature_transformers = self._get_feature_transformers()
+        super().__init__(feature_transformers, self.save_dir / "concat.pickle")
+
+    def _get_feature_transformers(self):
+        transformers = []
+        for config in self.configs:
+            config["save_path"] = self.save_dir / f"{config['feature_name']}.pickle"
+            transformers.append(self.feature_transformer(**config))
+        return transformers

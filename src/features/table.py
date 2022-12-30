@@ -1,14 +1,15 @@
 import gc
+from pathlib import Path
 from typing import List, Union
 
 import pandas as pd
-from src.features.base import AbstractFeatureTransformer, ConcatFeatures
+from src.features.base import AbstractFeatureTransformer, ConcatSameClassFeatures
 
 
 class GroupAggregation(AbstractFeatureTransformer):
     def __init__(
         self,
-        save_path: str,
+        save_path: Union[str, Path],
         group_keys: Union[str, List],
         target: str,
         agg: str,
@@ -44,18 +45,38 @@ class GroupAggregation(AbstractFeatureTransformer):
         return feature
 
 
-class ConcatGroupAggregation(ConcatFeatures):
+class ConcatGroupAggregation(ConcatSameClassFeatures):
     def __init__(
         self,
-        group_aggregation_configs: List,
-        save_path: str,
+        configs: List,
+        save_dir: Union[str, Path],
     ):
-        self.group_aggregation_configs = group_aggregation_configs
-        feature_transformers = self._get_feature_transformers()
-        super().__init__(feature_transformers, save_path)
+        super().__init__(configs, save_dir, GroupAggregation)
 
-    def _get_feature_transformers(self):
-        transformers = []
-        for config in self.group_aggregation_configs:
-            transformers.append(GroupAggregation(**config))
-        return transformers
+
+class DiffFeatures(AbstractFeatureTransformer):
+    def __init__(
+        self,
+        save_path: str,
+        left_feature: str,
+        right_feature: str,
+        feature_name: str,
+    ):
+        super().__init__(save_path)
+        self.left = left_feature
+        self.right = right_feature
+        self.feature_name = feature_name
+
+    def _transform(self, df: pd.DataFrame) -> pd.DataFrame:
+        feature = df[self.left] - df[self.right]
+        feature = pd.DataFrame(feature, columns=[self.feature_name])
+        return feature
+
+
+class ConcatDiffFeatures(ConcatSameClassFeatures):
+    def __init__(
+        self,
+        configs: List,
+        save_dir: Union[str, Path],
+    ):
+        super().__init__(configs, save_dir, DiffFeatures)
